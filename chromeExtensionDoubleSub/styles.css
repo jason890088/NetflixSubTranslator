@@ -1,0 +1,20 @@
+#translated-subtitle {
+    position: fixed;
+    left: 50%;
+    bottom: 20%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.6);
+    color: white;
+    padding: 8px 16px;
+    border-radius: 8px;
+    z-index: 9999;
+    font-size: 24px;
+    cursor: move;
+    resize: both;
+    overflow: auto;
+    max-width: 80%;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    user-select: none;
+    line-height: 1.4;
+    text-align: center;
+}
