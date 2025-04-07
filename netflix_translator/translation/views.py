@@ -1,21 +1,24 @@
-from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
-import json
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
 from .model_manager import TranslationModelManager
+from rest_framework import status
+from .logger import logger
 
-@csrf_exempt
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
 def translate_text(request):
-    if request.method == "POST":
-        data = json.loads(request.body)
-        text = data.get("text", "")
-        print(text)
+    text = request.data.get("text", "")
 
-        if not text:
-            return JsonResponse({"error": "No text provided"}, status=400)
+    if not text:
+        return Response({"error": "No text provided"}, status=status.HTTP_400_BAD_REQUEST)
 
-        translation = TranslationModelManager().translate(text)
+    translation = TranslationModelManager().translate(text)
 
-        if translation is None:
-            return JsonResponse({"error": "Translation failed"}, status=500)
+    if translation is None:
+        return Response({"error": "Translation failed"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-        return JsonResponse({"translation": translation})
+    logger.info(f"User {request.user.username} translated text: {text} to {translation}")
+    return Response({"translation": translation})

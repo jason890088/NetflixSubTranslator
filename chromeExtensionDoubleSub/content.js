@@ -33,7 +33,6 @@ setInterval(() => {
             subtitleVisible = true;
 
             if (originalText !== lastSubtitle) {
-                //console.log("🎬 偵測到字幕:", originalText);
                 lastSubtitle = originalText;
 
                 if (translationEnabled) {
@@ -52,20 +51,21 @@ setInterval(() => {
     }
 }, 100);
 
-// 發送字幕到 Django API
+
 function sendSubtitleToDjango(subtitle) {
-    fetch("http://127.0.0.1:8000/api/translate/", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text: subtitle }),
-        mode: "cors"
-    })
-        .then(response => response.json())
-        .then(data => {
-            //console.log("🌍 翻譯結果:", data.translation);
-            displayTranslatedSubtitle(data.translation);
-        })
-        .catch(error => console.error("❌ API 錯誤:", error));
+    chrome.runtime.sendMessage(
+        {
+            action: "translate",
+            text: subtitle
+        },
+        (response) => {
+            if (response?.translation) {
+                displayTranslatedSubtitle(response.translation);
+            } else {
+                console.warn("⚠️ 翻譯失敗：", response?.error || "未知錯誤");
+            }
+        }
+    );
 }
 
 // 顯示翻譯後的字幕
@@ -91,7 +91,6 @@ function displayTranslatedSubtitle(translation) {
 
         makeElementDraggable(existingDiv);
         observeResize(existingDiv);
-
         document.body.appendChild(existingDiv);
     }
 

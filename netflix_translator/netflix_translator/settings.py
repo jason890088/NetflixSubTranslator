@@ -37,9 +37,13 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'translation',  # 新增的應用
-    
+    # Third-party apps
+    'rest_framework',
+    'rest_framework_simplejwt',
     'corsheaders',
+    
+    'translation',  # 翻譯相關API
+    'accounts',  # 用戶帳號相關API
 ]
 
 MIDDLEWARE = [
@@ -130,3 +134,24 @@ CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:8000",
     "https://www.netflix.com",
 ]
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+}
+
+# Logging configuration
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+        },
+    },
+    "root": {
+        "handlers": ["console"],
+        "level": "WARNING",
+    },
+}

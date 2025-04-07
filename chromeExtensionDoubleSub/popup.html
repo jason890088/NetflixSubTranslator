@@ -1,34 +1,53 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Netflix Subtitle Translator</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            width: 200px;
-            padding: 10px;
-            text-align: center;
-        }
-        button {
-            background-color: #ffcc00;
-            border: none;
-            padding: 10px;
-            width: 100%;
-            font-size: 16px;
-            cursor: pointer;
-            border-radius: 5px;
-        }
-        button:hover {
-            background-color: #e6b800;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Netflix Subtitle Translator</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      width: 250px;
+      padding: 10px;
+      text-align: center;
+    }
+    input {
+      width: 90%;
+      padding: 8px;
+      margin: 5px 0;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    button {
+      background-color: #ffcc00;
+      border: none;
+      padding: 10px;
+      width: 100%;
+      font-size: 16px;
+      cursor: pointer;
+      border-radius: 5px;
+      margin-top: 10px;
+    }
+    button:hover {
+      background-color: #e6b800;
+    }
+    #status {
+      font-size: 14px;
+      margin-top: 8px;
+    }
+  </style>
 </head>
 <body>
-    <h3>Netflix Subtitle Translator</h3>
-    <button id="toggleTranslation">🔄 讀取中...</button>
+  <h3>🔐 登入帳號</h3>
+  <input type="text" id="username" placeholder="帳號" />
+  <input type="password" id="password" placeholder="密碼" />
+  <button id="loginButton">登入</button>
+  <button id="logoutButton" style="margin-top: 10px; background-color: #ccc; display: none;">🚪 登出</button>
+  <div id="status"></div>
 
-    <script src="popup.js"></script>
+  <hr />
+  <button id="toggleTranslation">🔄 讀取中...</button>
+
+  <script src="popup.js"></script>
 </body>
 </html>
