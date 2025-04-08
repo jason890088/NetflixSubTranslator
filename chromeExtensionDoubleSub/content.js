@@ -23,6 +23,21 @@ chrome.runtime.onMessage.addListener((message) => {
             removeTranslatedSubtitle();
         }
     }
+
+    if (message.action === "resetSubtitleStyle") {
+        console.log("♻️ 收到重設字幕樣式指令");
+    
+        chrome.storage.sync.remove(["subtitlePosition", "subtitleSize"], () => {
+            const div = document.getElementById("translated-subtitle");
+            if (div) {
+                div.style.top = "80%";
+                div.style.left = "50%";
+                div.style.transform = "translateX(-50%)";
+                div.style.width = "auto";
+                div.style.height = "auto";
+            }
+        });
+    }
 });
 
 // 讀取初始開關狀態

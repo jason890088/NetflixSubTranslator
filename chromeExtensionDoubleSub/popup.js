@@ -7,8 +7,14 @@ document.addEventListener("DOMContentLoaded", function () {
     const passwordInput = document.getElementById("password");
     const serverInput = document.getElementById("serverInput");
     const serverButton = document.getElementById("serverButton");
+    const resetButton = document.getElementById("resetSubtitle");
 
-
+    resetButton.addEventListener("click", () => {
+        chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+            chrome.tabs.sendMessage(tabs[0].id, { action: "resetSubtitleStyle" });
+        });
+    });
+    
     chrome.storage.sync.get("serverUrl", (data) => {
         const url = data.serverUrl;
 
