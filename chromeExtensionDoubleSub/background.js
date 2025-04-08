@@ -2,11 +2,28 @@ let ws = null;
 let isReady = false;
 let reconnecting = false;
 let portGlobal = null;
+let activeTabId = null; 
 
 // ✅ 接收 content.js 使用 connect 建立持久通道
 chrome.runtime.onConnect.addListener((port) => {
     console.log("🔌 接收到 content.js 長連線:", port.name);
     portGlobal = port;
+
+    if (port.sender?.tab?.id) {
+        activeTabId = port.sender.tab.id;
+        console.log("🌐 啟用 WebSocket 的 tabId：", activeTabId);
+    }
+
+    port.onDisconnect.addListener(() => {
+        console.warn("❌ Content script disconnected，關閉 WebSocket");
+
+        if (ws && ws.readyState === WebSocket.OPEN) {
+            ws.close(1000, "Tab closed or reloaded");
+        }
+
+        ws = null;
+        isReady = false;
+    });
 
     port.onMessage.addListener((msg) => {
         if (msg.action === "translate") {
@@ -19,6 +36,19 @@ chrome.runtime.onConnect.addListener((port) => {
             });
         }
     });
+});
+
+// ✅ 監聽 tab 關閉事件，關閉 WebSocket
+chrome.tabs.onRemoved.addListener((tabId) => {
+    if (tabId === activeTabId) {
+        console.log("🧹 被關閉的是 activeTab，自動關閉 WebSocket");
+        if (ws && ws.readyState === WebSocket.OPEN) {
+            ws.close(1000, "Tab closed");
+        }
+        ws = null;
+        isReady = false;
+        activeTabId = null;
+    }
 });
 
 // ✅ 接收 popup.js 登入成功後觸發初始化

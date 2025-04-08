@@ -1,5 +1,7 @@
 import torch
 from transformers import MBartForConditionalGeneration, MBart50TokenizerFast
+from opencc import OpenCC 
+
 
 class TranslationModelManager:
     _instance = None
@@ -18,6 +20,8 @@ class TranslationModelManager:
         self.tokenizer = MBart50TokenizerFast.from_pretrained(self.model_name)
         self.model = MBartForConditionalGeneration.from_pretrained(self.model_name).to(self.device)
         self.model.eval()
+        
+        self.opencc = OpenCC('s2twp')  # s2twp = 簡體轉台灣繁體
 
     def translate(self, text):
         if not text:
@@ -29,4 +33,8 @@ class TranslationModelManager:
                 **inputs,
                 forced_bos_token_id=self.tokenizer.lang_code_to_id[self.target_lang]
             )
-        return self.tokenizer.decode(translated[0], skip_special_tokens=True)
+            
+        simplified_output = self.tokenizer.decode(translated[0], skip_special_tokens=True)
+        traditional_output = self.opencc.convert(simplified_output)
+        
+        return traditional_output
