@@ -27,10 +27,10 @@ import websocket
 import json
 
 # 👉 這裡換成你自己的 JWT Access Token
-JWT_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzQ0MDg1NDU5LCJpYXQiOjE3NDQwODUxNTksImp0aSI6IjQwNDRhMDAxYzA2NTRjMmFiZjJlM2ZhZDVlM2Y2YTk2IiwidXNlcl9pZCI6MX0.Z8xQoO2NysQLPC40GCPcZOr-Z_9Vr7tQwuOEyPk3GxY"
+JWT_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzQ0MDk4MjYyLCJpYXQiOjE3NDQwOTc5NjIsImp0aSI6ImI1ZDJjMTlhYzVjMzQxYjM4NzZlOTM4Y2I2ZTY4ZDYzIiwidXNlcl9pZCI6MX0.NY8MQb2SZavA6jcosQCSzVJQKgvYWlbZ_cLquFBsnKA"
 
 # 👉 WebSocket 連線 URL（帶上 token）
-WS_URL = f"ws://localhost:8000/ws/translate/?token={JWT_TOKEN}"
+WS_URL = f"wss://rooster-free-absolutely.ngrok-free.app/ws/translate/?token={JWT_TOKEN}"
 
 def on_open(ws):
     print("🔗 已連線成功，送出字幕...")

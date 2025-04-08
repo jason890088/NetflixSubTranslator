@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-24z0buy-)5b0wdf+=xrdhe#puwav2u)g239jxka83k4ka*w@i2
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['rooster-free-absolutely.ngrok-free.app','*']
 
 
 # Application definition
@@ -138,6 +138,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:8000",
     "https://www.netflix.com",
+    "https://rooster-free-absolutely.ngrok-free.app",
 ]
 
 REST_FRAMEWORK = {

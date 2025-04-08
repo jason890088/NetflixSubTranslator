@@ -47,6 +47,17 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
             console.log("✅ WebSocket 已透過登入初始化");
         });
     }
+
+    // 🔥 登出後關閉 WebSocket
+    if (message.action === "logout") {
+        if (ws && ws.readyState === WebSocket.OPEN) {
+            console.log("🚪 登出中，關閉 WebSocket...");
+            ws.close();
+        }
+        ws = null;
+        isReady = false;
+        return;
+    }
 });
 
 // ✅ 建立 WebSocket 並轉送訊息
@@ -56,83 +67,110 @@ function ensureWebSocketInitialized(callback) {
         return;
     }
 
+    if (ws && ws.readyState === WebSocket.CONNECTING) {
+        console.log("🕐 WebSocket 正在建立中，請稍候...");
+        return;
+    }
+
     chrome.storage.local.get(["access", "refresh"], ({ access, refresh }) => {
         if (!access) {
             console.warn("⚠️ 沒有 access token，無法建立 WebSocket");
             return;
         }
 
-        console.log("🌐 建立 WebSocket 連線中...");
-        ws = new WebSocket(`ws://127.0.0.1:8000/ws/translate/?token=${access}`);
-
-        ws.onopen = () => {
-            console.log("🔌 WebSocket 已建立");
-            isReady = true;
-            callback();
-        };
-
-        ws.onmessage = (event) => {
-            const data = JSON.parse(event.data);
-            if (data.translation) {
-                // content.js 使用 connect 就傳給 port
-                if (portGlobal) {
-                    portGlobal.postMessage({
-                        action: "displayTranslation",
-                        translation: data.translation
-                    });
-                } else {
-                    // fallback 傳給 sendMessage
-                    chrome.runtime.sendMessage({
-                        action: "displayTranslation",
-                        translation: data.translation
-                    });
-                }
+        chrome.storage.sync.get("serverUrl", ({ serverUrl }) => {
+            if (!serverUrl) {
+                console.error("❌ 未設定 serverUrl，無法建立 WebSocket");
+                return;
             }
-        };
 
-        ws.onerror = (err) => {
-            console.error("❌ WebSocket 錯誤：", err);
-        };
+            console.log("🌐 建立 WebSocket 連線中...");
+            ws = new WebSocket(`wss://${serverUrl}/ws/translate/?token=${access}`);
 
-        ws.onclose = () => {
-            console.warn("🔌 WebSocket 關閉");
-            ws = null;
-            isReady = false;
+            ws.onopen = () => {
+                console.log("🔌 WebSocket 已建立");
+                isReady = true;
+                callback();
+            };
 
-            if (!reconnecting && refresh) {
-                reconnecting = true;
-                refreshAccessToken(refresh).then((newToken) => {
-                    if (newToken) {
-                        chrome.storage.local.set({ access: newToken }, () => {
-                            console.log("🔁 使用新 access token 重連 WebSocket");
-                            reconnecting = false;
-                            ensureWebSocketInitialized(() => {});
+            ws.onmessage = (event) => {
+                const data = JSON.parse(event.data);
+                if (data.translation) {
+                    if (portGlobal) {
+                        portGlobal.postMessage({
+                            action: "displayTranslation",
+                            translation: data.translation
                         });
                     } else {
-                        console.error("⛔ 無法刷新 token，請重新登入");
-                        reconnecting = false;
+                        chrome.runtime.sendMessage({
+                            action: "displayTranslation",
+                            translation: data.translation
+                        });
                     }
-                });
-            }
-        };
+                }
+            };
+
+            ws.onerror = (err) => {
+                console.error("❌ WebSocket 錯誤：", err);
+            };
+
+            ws.onclose = () => {
+                console.warn("🔌 WebSocket 關閉");
+                ws = null;
+                isReady = false;
+
+                if (!reconnecting && refresh) {
+                    reconnecting = true;
+                    refreshAccessToken(refresh).then((newToken) => {
+                        if (newToken) {
+                            chrome.storage.local.set({ access: newToken }, () => {
+                                console.log("🔁 使用新 access token 重連 WebSocket");
+                                reconnecting = false;
+                                ensureWebSocketInitialized(() => {});
+                            });
+                        } else {
+                            console.error("⛔ 無法刷新 token，請重新登入");
+                            reconnecting = false;
+                        }
+                    });
+                }
+            };
+        });
     });
 }
 
 // 🔄 刷新 access token
 function refreshAccessToken(refreshToken) {
-    return fetch("http://127.0.0.1:8000/api/auth/token/refresh/", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ refresh: refreshToken }),
-        mode: "cors"
-    })
-        .then(async (res) => {
-            if (!res.ok) return null;
-            const data = await res.json();
-            console.log("✅ 已刷新 access token");
-            return data.access;
-        })
-        .catch(() => null);
+    return new Promise((resolve) => {
+        chrome.storage.sync.get("serverUrl", ({ serverUrl }) => {
+            if (!serverUrl) {
+                console.error("❌ 未設定 serverUrl，無法刷新 token");
+                resolve(null);
+                return;
+            }
+
+            fetch(`https://${serverUrl}/api/auth/token/refresh/`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ refresh: refreshToken }),
+                mode: "cors"
+            })
+            .then(async (res) => {
+                if (!res.ok) {
+                    console.warn("⚠️ token refresh 失敗");
+                    resolve(null);
+                    return;
+                }
+                const data = await res.json();
+                console.log("✅ 已刷新 access token");
+                resolve(data.access);
+            })
+            .catch((err) => {
+                console.error("❌ 無法刷新 token：", err);
+                resolve(null);
+            });
+        });
+    });
 }

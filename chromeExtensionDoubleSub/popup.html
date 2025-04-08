@@ -1,53 +1,50 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Netflix Subtitle Translator</title>
   <style>
     body {
       font-family: Arial, sans-serif;
-      width: 250px;
+      width: 240px;
       padding: 10px;
-      text-align: center;
     }
-    input {
-      width: 90%;
+    input, button {
+      width: 100%;
+      margin-bottom: 8px;
       padding: 8px;
-      margin: 5px 0;
-      border: 1px solid #ccc;
-      border-radius: 4px;
+      font-size: 14px;
+      box-sizing: border-box;
     }
     button {
       background-color: #ffcc00;
       border: none;
-      padding: 10px;
-      width: 100%;
-      font-size: 16px;
       cursor: pointer;
       border-radius: 5px;
-      margin-top: 10px;
     }
     button:hover {
       background-color: #e6b800;
     }
-    #status {
-      font-size: 14px;
-      margin-top: 8px;
+    #logoutButton {
+      background-color: #e06666;
+      display: none;
     }
   </style>
 </head>
 <body>
-  <h3>🔐 登入帳號</h3>
-  <input type="text" id="username" placeholder="帳號" />
-  <input type="password" id="password" placeholder="密碼" />
-  <button id="loginButton">登入</button>
-  <button id="logoutButton" style="margin-top: 10px; background-color: #ccc; display: none;">🚪 登出</button>
-  <div id="status"></div>
+  <h3>Netflix Subtitle Translator</h3>
+  <input type="text" id="serverInput" placeholder="WebSocket Server" />
+  <button id="serverButton">儲存伺服器位址</button>
 
-  <hr />
+  <input id="username" type="text" placeholder="帳號" />
+  <input id="password" type="password" placeholder="密碼" />
+  <button id="loginButton">登入</button>
+  <button id="logoutButton">登出</button>
+  <div id="status" style="margin: 10px 0; font-weight: bold;"></div>
   <button id="toggleTranslation">🔄 讀取中...</button>
 
+  <!-- ✅ 外部載入 -->
   <script src="popup.js"></script>
 </body>
 </html>
