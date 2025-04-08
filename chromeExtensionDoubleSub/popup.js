@@ -56,6 +56,7 @@ document.addEventListener("DOMContentLoaded", function () {
             }, () => {
                 statusDiv.textContent = "✅ 登入成功！";
                 hideLoginForm();
+                chrome.runtime.sendMessage({ action: "init_websocket" });
             });
         } catch (error) {
             console.error("登入失敗：", error);
@@ -99,4 +100,5 @@ document.addEventListener("DOMContentLoaded", function () {
         loginButton.style.display = "block";
         logoutButton.style.display = "none";
     }
+    
 });

@@ -37,13 +37,18 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
     # Third-party apps
     'rest_framework',
     'rest_framework_simplejwt',
     'corsheaders',
-    
+    'channels',  # WebSocket
+    'channels_redis',  # Redis for WebSocket
+
     'translation',  # 翻譯相關API
     'accounts',  # 用戶帳號相關API
+    
+
 ]
 
 MIDDLEWARE = [
@@ -141,6 +146,16 @@ REST_FRAMEWORK = {
     ),
 }
 
+# Channels settings
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [("127.0.0.1", 6379)],
+        },
+    },
+}
+
 # Logging configuration
 LOGGING = {
     "version": 1,
@@ -155,3 +170,4 @@ LOGGING = {
         "level": "WARNING",
     },
 }
+

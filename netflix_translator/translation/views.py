@@ -1,9 +1,9 @@
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from .model_manager import TranslationModelManager
+from translation.model_manager import TranslationModelManager
 from rest_framework import status
-from .logger import logger
+from translation.logger import logger
 
 
 

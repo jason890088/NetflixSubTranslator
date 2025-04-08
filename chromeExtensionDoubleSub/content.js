@@ -1,25 +1,33 @@
 console.log("Netflix Subtitle Translator 擴充功能已載入！");
 
-let lastSubtitle = ""; // 避免重複發送相同的字幕
-let subtitleVisible = false; // 追蹤 Netflix 字幕是否可見
-let translationEnabled = true; // 是否啟用翻譯
+let lastSubtitle = "";
+let subtitleVisible = false;
+let translationEnabled = true;
 
-// 讀取翻譯開關狀態
-chrome.storage.sync.get("translationEnabled", function (data) {
-    translationEnabled = data.translationEnabled !== false; // 預設為開啟
+// 建立與 background 的長連線
+const port = chrome.runtime.connect({ name: "subtitle-connection" });
+
+// 接收來自 background 的翻譯結果
+port.onMessage.addListener((message) => {
+    if (message.action === "displayTranslation" && message.translation) {
+        displayTranslatedSubtitle(message.translation);
+    }
 });
 
-// 接收來自 popup 的開關訊息
+// 接收來自 popup 的翻譯開關狀態
 chrome.runtime.onMessage.addListener((message) => {
     if (message.action === "toggleTranslation") {
         console.log("📩 收到 toggleTranslation 訊息，翻譯啟用狀態：", message.enabled);
         translationEnabled = message.enabled;
-        console.log("🔄 翻譯狀態已更新:", translationEnabled ? "開啟" : "關閉");
-
         if (!translationEnabled) {
             removeTranslatedSubtitle();
         }
     }
+});
+
+// 讀取初始開關狀態
+chrome.storage.sync.get("translationEnabled", function (data) {
+    translationEnabled = data.translationEnabled !== false; // 預設為開啟
 });
 
 // 不斷偵測 Netflix 字幕
@@ -36,7 +44,7 @@ setInterval(() => {
                 lastSubtitle = originalText;
 
                 if (translationEnabled) {
-                    sendSubtitleToDjango(originalText);
+                    port.postMessage({ action: "translate", text: originalText });
                 }
             }
         } else {
@@ -49,24 +57,7 @@ setInterval(() => {
     if (!subtitleVisible) {
         removeTranslatedSubtitle();
     }
-}, 100);
-
-
-function sendSubtitleToDjango(subtitle) {
-    chrome.runtime.sendMessage(
-        {
-            action: "translate",
-            text: subtitle
-        },
-        (response) => {
-            if (response?.translation) {
-                displayTranslatedSubtitle(response.translation);
-            } else {
-                console.warn("⚠️ 翻譯失敗：", response?.error || "未知錯誤");
-            }
-        }
-    );
-}
+}, 50);
 
 // 顯示翻譯後的字幕
 function displayTranslatedSubtitle(translation) {

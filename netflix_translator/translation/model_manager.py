@@ -23,7 +23,7 @@ class TranslationModelManager:
         if not text:
             return None
 
-        inputs = self.tokenizer(text, return_tensors="pt", padding=True, truncation=True).to(self.device)
+        inputs = self.tokenizer(text, return_tensors="pt", padding=True, truncation=True, max_length=128).to(self.device)
         with torch.no_grad():
             translated = self.model.generate(
                 **inputs,
